@@ -17,10 +17,10 @@
                 @Html.DisplayNameFor(model => model.Prediction[0].FileName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Prediction[0].Url)
+                @Html.DisplayNameFor(model => model.Prediction[0].Question)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Prediction[0].Question)
+                @Html.DisplayNameFor(model => model.Prediction[0].Url)
             </th>
             <th></th>
         </tr>
@@ -32,14 +32,12 @@
                 @Html.DisplayFor(modelItem => item.FileName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Url)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Question)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.PredictionId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.PredictionId">Details</a> |
+                <img src="@item.Url" alt="@item.FileName" style="max-width: 400px"/>
+            </td>
+            <td>
                 <a asp-page="./Delete" asp-route-id="@item.PredictionId">Delete</a>
             </td>
         </tr>

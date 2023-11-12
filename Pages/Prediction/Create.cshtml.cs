@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Lab5.Data;
 using Lab5.Models;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace Lab5.Pages.Predictions
 {
@@ -32,36 +33,17 @@ namespace Lab5.Pages.Predictions
         [BindProperty]
         public Models.Prediction Prediction { get; set; }
 
-        [BindProperty]
-        public IFormFile FileUpload { get; set; }
-
-
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(IFormFile FileUpload)
         {
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("Prediction Not Created");
-                foreach (var entry in ModelState)
-                {
-                    var key = entry.Key; // The model property name
-                    var errors = entry.Value.Errors; // A collection of ModelError instances
-
-                    foreach (var error in errors)
-                    {
-                        var errorMessage = error.ErrorMessage; // The error message
-                        var exception = error.Exception; // The exception associated with the error, if any
-
-                        // Log, display, or handle the error accordingly
-                        Console.WriteLine($"Property: {key}, Error Message: {errorMessage}, Exception: {exception?.Message}");
-                    }
-                }
+                //Console.WriteLine("Prediction Created Successfully");
                 return Page();
             }
 
             if (FileUpload != null && FileUpload.Length > 0)
             {
-                Console.WriteLine("File: ", FileUpload);
                 Prediction.FileName = FileUpload.FileName;
 
                 try
@@ -71,7 +53,10 @@ namespace Lab5.Pages.Predictions
                     await containerClient.CreateIfNotExistsAsync();
 
                     var blobClient = containerClient.GetBlobClient(Prediction.FileName);
-                    await blobClient.UploadAsync(FileUpload.OpenReadStream(), true);
+                    using (var stream = FileUpload.OpenReadStream())
+                    {
+                        await blobClient.UploadAsync(stream, true);
+                    }
 
                     Prediction.Url = blobClient.Uri.ToString();
                 }
@@ -83,7 +68,7 @@ namespace Lab5.Pages.Predictions
 
             _context.Predictions.Add(Prediction);
             await _context.SaveChangesAsync();
-            Console.WriteLine("Prediction Created Successfully");
+            //Console.WriteLine("Prediction Created Successfully");
 
             return RedirectToPage("./Index");
         }
